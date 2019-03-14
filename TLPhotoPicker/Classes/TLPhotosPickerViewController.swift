@@ -63,7 +63,11 @@ public struct TLPhotosPickerConfigure {
     public var allowedVideo = true
     public var allowedAlbumCloudShared = false
     public var allowedVideoRecording = true
+    #if swift(>=4.1)
     public var recordingVideoQuality: UIImagePickerController.QualityType = .typeMedium
+    #else
+    public var recordingVideoQuality: UIImagePickerControllerQualityType = .typeMedium
+    #endif
     public var maxVideoDuration:TimeInterval? = nil
     public var autoPlay = true
     public var muteAudio = true
@@ -303,7 +307,11 @@ extension TLPhotosPickerViewController {
         self.subTitleLabel.text = self.configure.tapHereToChange
         self.cancelButton.title = self.configure.cancelTitle
         self.doneButton.title = self.configure.doneTitle
+        #if swift(>=4.1)
         self.doneButton.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: UIFont.labelFontSize)], for: .normal)
+        #else
+        self.doneButton.setTitleTextAttributes([NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: UIFont.labelFontSize)], for: .normal)
+        #endif
         self.emptyView.isHidden = true
         self.emptyImageView.image = self.configure.emptyImage
         self.emptyMessageLabel.text = self.configure.emptyMessage
@@ -539,7 +547,7 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
     open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
-    
+    #if swift(>=4.1)
     open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = (info[.originalImage] as? UIImage) {
             var placeholderAsset: PHObjectPlaceholder? = nil
@@ -574,6 +582,42 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
         
         picker.dismiss(animated: true, completion: nil)
     }
+#else
+open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+    if let image = (info[UIImagePickerControllerOriginalImage] as? UIImage) {
+        var placeholderAsset: PHObjectPlaceholder? = nil
+        PHPhotoLibrary.shared().performChanges({
+            let newAssetRequest = PHAssetChangeRequest.creationRequestForAsset(from: image)
+            placeholderAsset = newAssetRequest.placeholderForCreatedAsset
+        }, completionHandler: { [weak self] (sucess, error) in
+            if sucess, let `self` = self, let identifier = placeholderAsset?.localIdentifier {
+                guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil).firstObject else { return }
+                var result = TLPHAsset(asset: asset)
+                result.selectedOrder = self.selectedAssets.count + 1
+                self.selectedAssets.append(result)
+                self.logDelegate?.selectedPhoto(picker: self, at: 1)
+            }
+        })
+    }
+    else if (info[UIImagePickerControllerMediaType] as? String) == kUTTypeMovie as String {
+        var placeholderAsset: PHObjectPlaceholder? = nil
+        PHPhotoLibrary.shared().performChanges({
+            let newAssetRequest = PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: info[UIImagePickerControllerMediaURL] as! URL)
+            placeholderAsset = newAssetRequest?.placeholderForCreatedAsset
+        }) { [weak self] (sucess, error) in
+            if sucess, let `self` = self, let identifier = placeholderAsset?.localIdentifier {
+                guard let asset = PHAsset.fetchAssets(withLocalIdentifiers: [identifier], options: nil).firstObject else { return }
+                var result = TLPHAsset(asset: asset)
+                result.selectedOrder = self.selectedAssets.count + 1
+                self.selectedAssets.append(result)
+                self.logDelegate?.selectedPhoto(picker: self, at: 1)
+            }
+        }
+    }
+    
+    picker.dismiss(animated: true, completion: nil)
+}
+#endif
 }
 
 // MARK: - UICollectionView Scroll Delegate
