@@ -75,7 +75,7 @@ open class TLPhotoCollectionViewCell: UICollectionViewCell {
                 self.observer = NotificationCenter.default.addObserver(forName: .AVPlayerItemDidPlayToEndTime, object: self.player?.currentItem, queue: nil, using: { [weak self] (_) in
                     DispatchQueue.main.async {
                         guard let `self` = self else { return }
-                        #if swift(>=4.1)
+                        #if swift(>=4.2)
                         self.player?.seek(to: CMTime.zero)
                         #else
                         self.player?.seek(to: kCMTimeZero)

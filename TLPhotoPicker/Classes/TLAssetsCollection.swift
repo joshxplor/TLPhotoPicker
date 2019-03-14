@@ -203,7 +203,7 @@ public struct TLPHAsset {
                 do {
                     var data = data
                     if convertLivePhotosToJPG == true, let imgData = data, let rawImage = UIImage(data: imgData)?.upOrientationImage() {
-                        #if swift(>=4.1)
+                        #if swift(>=4.2)
                         data = rawImage.jpegData(compressionQuality: 1)
                         #else
                         data = UIImageJPEGRepresentation(rawImage, 1)
