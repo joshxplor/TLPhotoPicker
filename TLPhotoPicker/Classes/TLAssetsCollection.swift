@@ -204,9 +204,12 @@ public struct TLPHAsset {
             return PHImageManager.default().requestImageData(for: phAsset, options: requestOptions, resultHandler: { (data, uti, orientation, info) in
                 do {
                     var data = data
-                    let needConvertLivePhotoToJPG = phAsset.mediaSubtypes.contains(.photoLive) == true && convertLivePhotosToJPG == true
-                    if needConvertLivePhotoToJPG, let imgData = data, let rawImage = UIImage(data: imgData)?.upOrientationImage() {
+                    if convertLivePhotosToJPG == true, let imgData = data, let rawImage = UIImage(data: imgData)?.upOrientationImage() {
+                        #if swift(>=4.2)
                         data = rawImage.jpegData(compressionQuality: 1)
+                        #else
+                        data = UIImageJPEGRepresentation(rawImage, 1)
+                        #endif
                     }
                     try data?.write(to: localURL)
                     DispatchQueue.main.async {
