@@ -63,7 +63,7 @@ public struct TLPhotosPickerConfigure {
     public var allowedVideo = true
     public var allowedAlbumCloudShared = false
     public var allowedVideoRecording = true
-    #if swift(>=4.1)
+    #if swift(>=4.2)
     public var recordingVideoQuality: UIImagePickerController.QualityType = .typeMedium
     #else
     public var recordingVideoQuality: UIImagePickerControllerQualityType = .typeMedium
@@ -307,7 +307,7 @@ extension TLPhotosPickerViewController {
         self.subTitleLabel.text = self.configure.tapHereToChange
         self.cancelButton.title = self.configure.cancelTitle
         self.doneButton.title = self.configure.doneTitle
-        #if swift(>=4.1)
+        #if swift(>=4.2)
         self.doneButton.setTitleTextAttributes([NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: UIFont.labelFontSize)], for: .normal)
         #else
         self.doneButton.setTitleTextAttributes([NSAttributedStringKey.font: UIFont.boldSystemFont(ofSize: UIFont.labelFontSize)], for: .normal)
@@ -547,7 +547,7 @@ extension TLPhotosPickerViewController: UIImagePickerControllerDelegate, UINavig
     open func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
-    #if swift(>=4.1)
+    #if swift(>=4.2)
     open func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         if let image = (info[.originalImage] as? UIImage) {
             var placeholderAsset: PHObjectPlaceholder? = nil
