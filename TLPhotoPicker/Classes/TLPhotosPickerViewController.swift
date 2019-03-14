@@ -713,27 +713,7 @@ extension TLPhotosPickerViewController: PHPhotoLibraryChangeObserver {
                     self.focusedCollection?.fetchResult = changes.fetchResultAfterChanges
                     self.reloadCollectionView()
                 }else {
-                    self.collectionView.performBatchUpdates({ [weak self] in
-                        guard let `self` = self else { return }
-                        self.focusedCollection?.fetchResult = changes.fetchResultAfterChanges
-                        if let removed = changes.removedIndexes, removed.count > 0 {
-                            self.collectionView.deleteItems(at: removed.map { IndexPath(item: $0+addIndex, section:0) })
-                        }
-                        if let inserted = changes.insertedIndexes, inserted.count > 0 {
-                            self.collectionView.insertItems(at: inserted.map { IndexPath(item: $0+addIndex, section:0) })
-                        }
-                        changes.enumerateMoves { fromIndex, toIndex in
-                            self.collectionView.moveItem(at: IndexPath(item: fromIndex, section: 0),
-                                                         to: IndexPath(item: toIndex, section: 0))
-                        }
-                    }, completion: { [weak self] (completed) in
-                        guard let `self` = self else { return }
-                        if completed {
-                            if let changed = changes.changedIndexes, changed.count > 0 {
-                                self.collectionView.reloadItems(at: changed.map { IndexPath(item: $0+addIndex, section:0) })
-                            }
-                        }
-                    })
+                    self.collectionView.reloadData()
                 }
             }else {
                 self.focusedCollection?.fetchResult = changes.fetchResultAfterChanges
